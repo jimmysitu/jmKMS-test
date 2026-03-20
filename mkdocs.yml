@@ -1,0 +1,25 @@
+# MkDocs Material — add an entry under nav when you have docs/<paper>/content.md
+site_name: jmKMS Paper Formal
+site_description: Formal papers — PDF sources and jmKMS-generated Markdown
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - "Revamping Verilog Semantics (FV)": revamping_verilog_semantics/content.md
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
