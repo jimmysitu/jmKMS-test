@@ -3,3 +3,5 @@
 __pycache__/
 .venv/
 venv/
+# MkDocs local build output (CI builds fresh)
+site/

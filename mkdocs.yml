@@ -1,6 +1,9 @@
 # MkDocs Material — add an entry under nav when you have docs/<paper>/content.md
 site_name: jmKMS Paper Formal
 site_description: Formal papers — PDF sources and jmKMS-generated Markdown
+# After GitHub repo exists, set this to your real Pages URL (fixes absolute links / search):
+site_url: https://jimmysitu.github.io/jmKMS-Paper-Formal/
+repo_url: https://github.com/jimmysitu/jmKMS-Paper-Formal
 
 theme:
   name: material
