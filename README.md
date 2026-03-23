@@ -1,12 +1,12 @@
-# jmKMS-Paper-Formal
+# jmKMS-test
 
-Content repository for formal papers: raw PDFs and generated Markdown for [jmKMS](../jmKMS/). This layout matches the **Scenario A (single document)** structure in the engine README.
+Test / Benchmark data repository for [jmKMS](../jmKMS/). This repository contains raw test PDFs and verifies the generated Markdown outputs to ensure parser and layout consistency.
 
 ## Layout
 
 ```txt
-jmKMS-Paper-Formal/
-├── raw_pdfs/          # Put PDFs here (upload your files)
+jmKMS-test/
+├── raw_pdfs/          # Put test PDFs here
 ├── docs/              # Generated output; one subfolder per paper
 │   └── <paper_slug>/
 │       ├── content.md
@@ -28,8 +28,8 @@ jmKMS-Paper-Formal/
 3. Parse into `docs/` (output folder name = your choice, usually matching the PDF stem):
 
    ```sh
-   cd jmKMS-Paper-Formal
-   jmkms parse -i ./raw_pdfs/my_paper.pdf -o ./docs/my_paper/ -b pipeline
+   cd jmKMS-test
+   jmkms parse -i ./raw_pdfs/my_paper.pdf -o ./docs/my_paper/ 
    ```
 
 4. (Optional) Add the paper to `mkdocs.yml` under `nav`, then preview the site:
@@ -43,14 +43,14 @@ jmKMS-Paper-Formal/
 
 This repo includes [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml): every push to **`main`** or **`master`** builds MkDocs and deploys to GitHub Pages.
 
-1. Create a new repository on GitHub (e.g. `jmKMS-Paper-Formal`) and push this project:
+1. Create a new repository on GitHub (e.g. `jmKMS-test`) and push this project:
 
    ```sh
    git init
    git add .
    git commit -m "Initial content"
    git branch -M main
-   git remote add origin https://github.com/<YOU>/jmKMS-Paper-Formal.git
+   git remote add origin https://github.com/<YOU>/jmKMS-test.git
    git push -u origin main
    ```
 
@@ -58,7 +58,7 @@ This repo includes [`.github/workflows/deploy-pages.yml`](.github/workflows/depl
 
 3. Open **Actions**, wait for **Deploy to GitHub Pages** to finish. The site URL will be:
 
-   `https://<YOU>.github.io/jmKMS-Paper-Formal/`
+   `https://<YOU>.github.io/jmKMS-test/`
 
    (For an organization, replace `<YOU>` with the org name.)
 

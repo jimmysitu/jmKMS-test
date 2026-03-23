@@ -2,8 +2,10 @@
 site_name: jmKMS Paper Formal
 site_description: Formal papers — PDF sources and jmKMS-generated Markdown
 # After GitHub repo exists, set this to your real Pages URL (fixes absolute links / search):
-site_url: https://jimmysitu.github.io/jmKMS-Paper-Formal/
-repo_url: https://github.com/jimmysitu/jmKMS-Paper-Formal
+site_url: https://jimmysitu.github.io/jmKMS-test/
+repo_url: https://github.com/jimmysitu/jmKMS-test
+
+use_directory_urls: false
 
 theme:
   name: material
@@ -22,6 +24,7 @@ theme:
 nav:
   - Home: index.md
   - "Revamping Verilog Semantics (FV)": revamping_verilog_semantics/content.md
+  - "Empirical CPU Power Modelling": empirical_cpu_power_modelling/content.md
 
 markdown_extensions:
   - attr_list
