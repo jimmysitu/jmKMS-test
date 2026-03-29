@@ -522,13 +522,7 @@ Finally, we define the simulation relation $(\preceq)$ between ITrees by lifting
 
 Then it is straightforward that $(\preceq)$ relates the initial ITrees:
 
-<p align="center"><img src="assets/eq_23.png" alt="equation 23" style="width: 322px; max-width: 100%; height: auto;" /></p>
-
-(by the state relation definition)
-
-(by the simulation relation definition)
-
-(by the ITree definitions)
+<p align="center"><img src="assets/eq_23.png" alt="equation 23" style="width: 512px; max-width: 100%; height: auto;" /></p>
 
 Proving simulation. Now we prove that $(\preceq)$ is a simulation relation. We start by assuming $I \preceq S$ , which implies that $I$ is a module ITree with a state $s^{\mathrm{impl}}$ , $S$ is a specification with a state $s^{\mathrm{spec}}$ , and $s^{\mathrm{impl}} \preceq s^{\mathrm{spec}}$ . We need to prove that every step of $I$ can be simulated by $S$ , resulting in the next states still related by the state relation $(\preceq)$ . To this end, we perform a case analysis on pc_commit_vld.
 
