@@ -82,10 +82,6 @@ To manage the complexity of the standard semantics, we focus on the synthesizabl
 
 We now discuss the drawbacks of the standard semantics in deductive verification, beginning with nondeterminism. Figure 1 presents two Verilog modules that illustrate the nondeterministic nature of scheduling semantics. The module example contains an assignment (assign d_quad = ...) at line 5. Subsequently, an always_comb ("always") block at line 6 defines a combinational circuit. Within this block, a blocking assignment (d_db1 = d_cnt) prevents the execution of subsequent statements until it completes. In this example, d_db1 = d_cnt executes first, and then d_db1 += d_cnt executes, updating d_db1 with (2 * d_cnt). In the case of d_quad, multiple resolution steps are required due to
 
-<p align="center"><img src="assets/code_1.png" alt="code 1" style="width: 249px; max-width: 100%; height: auto;" /></p>
-
-<p align="center"><img src="assets/code_2.png" alt="code 2" style="width: 237px; max-width: 100%; height: auto;" /></p>
-
 <p align="center"><img src="assets/fig_1.png" alt="Figure 1" style="width: 501px; max-width: 100%; height: auto;" /></p>
 
 the chain of updates. Specifically, in order to evaluate the assignment to d_quad (at line 5) correctly, d_db1 should be evaluated first. The value of d_db1 is evaluated when the "always" block (at line 6) is evaluated. These value-update dependencies are illustrated on the right side of Figure 1.
@@ -94,17 +90,13 @@ As discussed in §2.1, the standard resolves these dependencies nondeterministic
 
 Parallel executions. First, the standard semantics requires considering all possible execution orders of updates, even when the updates are independent of each other, and thus any execution order leads to the same state transition.
 
-<p align="center"><img src="assets/code_3.png" alt="code 3" style="width: 476px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_1.png" alt="code 1" style="width: 476px; max-width: 100%; height: auto;" /></p>
 
 The figure above illustrates two distinct execution orders of the example module, both of which result in the same final state. When d_cnt is updated, it triggers two blocks: one that updates d_cnt_n, and another that updates d_db1, followed by d_quad. As shown in the figure, these updates are orthogonal, indicating that the final state is the same regardless of the execution path: whether d_cnt_n is updated first (left path) or d_db1 and d_quad are updated first (right path). Nevertheless, under the standard semantics, both execution paths should still be considered.
 
 Spurious updates. Furthermore, under the standard semantics, assignments may be executed unnecessarily when the values of right-hand-side operands are stale.
 
-(d_quadupdatedspuriously)
-
-(d_quad updated correctly)
-
-<p align="center"><img src="assets/eq_1.png" alt="equation 1" style="width: 500px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_1.png" alt="equation 1" style="width: 505px; max-width: 100%; height: auto;" /></p>
 
 The figure above shows an execution that includes a spurious update. When $\mathrm{d\_cnt}$ is updated (from $v_{0}$ to $v_{1}$ ), executing the assignment to $\mathrm{d\_quad}$ is spurious, as $\mathrm{d\_dbl}$ has not yet been updated ( $\mathrm{d\_quad}$ is incorrectly updated to $2 \cdot v_{0} + 2 \cdot v_{1}$ ). Once $\mathrm{d\_dbl}$ is updated to $2 \cdot v_{1}$ , $\mathrm{d\_quad}$ subsequently obtains the correct value $(4 \cdot v_{1})$ .
 
@@ -144,7 +136,7 @@ For clarity, we provide a list of unsupported components. We support wires and r
 
 Deterministic designs. In addition to limiting our coverage to synthesizable designs, we also require them to adhere to well-established guidelines [14] widely regarded by designers as best practices for deterministic Verilog modules. Our framework maintains a simple static predicate to ensure that the target design follows these guidelines. The purpose of the guidelines is to ensure that the design is free of race conditions between value updates. Specifically, the guidelines are: (1) use nonblocking assignments for sequential logic or latches, (2) use blocking assignments for combinational logic in an always block, (3) use nonblocking assignments when modeling both sequential and combinational logic in the same always block, (4) avoid mixing blocking and nonblocking assignments in the same always block, and (5) ensure that no variable is assigned, whether blocking or nonblocking, in more than one always block. Interested readers may refer to the guidelines for an intuition behind each item.
 
-<p align="center"><img src="assets/code_4.png" alt="code 4" style="width: 509px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_2.png" alt="code 2" style="width: 509px; max-width: 100%; height: auto;" /></p>
 
 Fig. 2. Formal syntax of Verilog (excerpts)
 
@@ -192,19 +184,13 @@ We construct semantic transfer functions in a bottom-up manner, from expressions
 
 Notation: $\mathcal{D}$ (set of declarations); $\mathcal{P}$ (set of hierarchical paths); $S$ (set of states); $S_{\mathrm{u}}$ $(\triangleq S,$ set of state updates); $\mathcal{V}$ $(\triangleq S,$ set of values)
 
-<p align="center"><img src="assets/eq_4.png" alt="equation 4" style="width: 174px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_4.png" alt="equation 4" style="width: 256px; max-width: 100%; height: auto;" /></p>
 
 <p align="center"><img src="assets/eq_5.png" alt="equation 5" style="width: 194px; max-width: 100%; height: auto;" /></p>
 
-<p align="center"><img src="assets/eq_6.png" alt="equation 6" style="width: 256px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_6.png" alt="equation 6" style="width: 153px; max-width: 100%; height: auto;" /></p>
 
-<p align="center"><img src="assets/eq_7.png" alt="equation 7" style="width: 221px; max-width: 100%; height: auto;" /></p>
-
-<p align="center"><img src="assets/eq_8.png" alt="equation 8" style="width: 317px; max-width: 100%; height: auto;" /></p>
-
-<p align="center"><img src="assets/eq_9.png" alt="equation 9" style="width: 141px; max-width: 100%; height: auto;" /></p>
-
-<p align="center"><img src="assets/eq_10.png" alt="equation 10" style="width: 153px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_7.png" alt="equation 7" style="width: 317px; max-width: 100%; height: auto;" /></p>
 
 Fig. 3. Semantics for expressions, L-values, and statements (excerpts)
 
@@ -226,23 +212,9 @@ Statements: assignments. Denotation of a statement $(\llbracket \cdot \rrbracket
 
 Notation: $\mathcal{D}_{\mathrm{u}}$ ( $\triangleq$ $\mathcal{D}$ , set of declaration updates); $\mathcal{R}$ (set of registers); $\mathcal{R}_{\mathrm{u}}$ ( $\triangleq$ $\mathcal{R}$ , set of register updates)
 
-<p align="center"><img src="assets/eq_11.png" alt="equation 11" style="width: 258px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_8.png" alt="equation 8" style="width: 440px; max-width: 100%; height: auto;" /></p>
 
-<p align="center"><img src="assets/eq_12.png" alt="equation 12" style="width: 434px; max-width: 100%; height: auto;" /></p>
-
-<p align="center"><img src="assets/eq_13.png" alt="equation 13" style="width: 307px; max-width: 100%; height: auto;" /></p>
-
-<p align="center"><img src="assets/eq_14.png" alt="equation 14" style="width: 293px; max-width: 100%; height: auto;" /></p>
-
-<p align="center"><img src="assets/eq_15.png" alt="equation 15" style="width: 263px; max-width: 100%; height: auto;" /></p>
-
-<p align="center"><img src="assets/eq_16.png" alt="equation 16" style="width: 223px; max-width: 100%; height: auto;" /></p>
-
-<p align="center"><img src="assets/eq_17.png" alt="equation 17" style="width: 260px; max-width: 100%; height: auto;" /></p>
-
-<p align="center"><img src="assets/eq_18.png" alt="equation 18" style="width: 234px; max-width: 100%; height: auto;" /></p>
-
-<p align="center"><img src="assets/eq_19.png" alt="equation 19" style="width: 324px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_9.png" alt="equation 9" style="width: 338px; max-width: 100%; height: auto;" /></p>
 
 Fig. 4. Semantics for blocks and generate-blocks (excerpts)
 
@@ -254,11 +226,9 @@ Statements: conditionals (feat. predicated updates). Next, we analyze the case o
 
 However, to enhance the usability of the semantics, we construct state updates per-variable, allowing easy extraction of transitions for specific variables of interest. This approach is particularly useful for proving invariants involving a subset of variables. To support per-variable state updates, we adopt the notion of *predicated updates*, where each entry in the update map is guarded by a predicate indicating whether the corresponding variable should be updated. $(h_1 \uplus \{p\} h_2)$ denotes a predicated update; for example:
 
-<p align="center"><img src="assets/eq_20.png" alt="equation 20" style="width: 372px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_10.png" alt="equation 10" style="width: 455px; max-width: 100%; height: auto;" /></p>
 
-is a per-variable update map with the same effect as the following:
-
-<p align="center"><img src="assets/eq_21.png" alt="equation 21" style="width: 236px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_11.png" alt="equation 11" style="width: 236px; max-width: 100%; height: auto;" /></p>
 
 With the denotation of a statement in hand, extending it to a sequence of statements $(\llbracket \cdot \rrbracket_{\overline{st}})$ is straightforward: the state updates are accumulated through evaluating previous statements and are used for the evaluation of the next statement.
 
@@ -282,7 +252,7 @@ Modules. Finally, we define the semantic transfer function for a module. Present
 
 Now we define the state-transition function of a module, using the least fixed point $(\llbracket \cdot \rrbracket_{mod}^{\infty})$ with respect to the declarations and wire states evaluated so far. Presented in Figure 5, $\llbracket m\rrbracket_{mod}^{\infty}$ is defined by repeatedly applying the semantic transfer function $(\llbracket m\rrbracket_{mod})$ until it reaches the fixed point, which intuitively means that no further dependencies remain unresolved. More formally, in Rocq, $\llbracket \cdot \rrbracket_{mod}^{\infty}$ is defined using a subset type that admits only fixed-point functions. Consequently, to define and use the function, the user must provide a proof that the fixpoint computation terminates, which can typically be discharged trivially by a single automated tactic.
 
-<p align="center"><img src="assets/code_5.png" alt="code 5" style="width: 398px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_3.png" alt="code 3" style="width: 398px; max-width: 100%; height: auto;" /></p>
 
 Fig. 6. A module that joins the outputs of two submodules using the valid/ready protocol, producing output only when both sources are valid.
 
@@ -290,11 +260,11 @@ Fig. 6. A module that joins the outputs of two submodules using the valid/ready 
 
 Assuming rst_n = 1 (i.e., after the reset), it is required to apply the semantic-transfer function twice to obtain the least fixed point ([example]mod); the wire updates are illustrated as follows:
 
-<p align="center"><img src="assets/code_6.png" alt="code 6" style="width: 413px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_4.png" alt="code 4" style="width: 413px; max-width: 100%; height: auto;" /></p>
 
 The state-update function $\llbracket \cdot \rrbracket_{Mod}$ is constructed directly from $\llbracket \cdot \rrbracket_{mod}^{\infty}$ : it takes the input values $(s_i)$ and the current register values $(s_r)$ , and returns register updates $(\in \mathcal{R}_{\mathrm{u}})$ and output values $(\in S)$ . Here, $\llbracket m \rrbracket_{mod}^{\infty}$ is used to derive the wire states and the register updates $(dsr)$ . Using $\llbracket \cdot \rrbracket_{Mod}$ , we can easily define the state-transition function $\mathcal{T}_m: S \times \mathcal{R} \rightarrow \mathcal{R} \times S$ :
 
-<p align="center"><img src="assets/eq_22.png" alt="equation 22" style="width: 301px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_12.png" alt="equation 12" style="width: 301px; max-width: 100%; height: auto;" /></p>
 
 where the current register state $(s_r)$ and the updates $(rs[0])$ are merged to obtain the next state.
 
@@ -302,7 +272,7 @@ Our semantics is modular at the level of state-update functions $\llbracket \cdo
 
 Partial evaluation. As a side benefit, we can further optimize the state-transition function with partial evaluation. For example, the denotation of an expression “a || b” can be partially evaluated $(\rightsquigarrow)$ as follows:
 
-<p align="center"><img src="assets/eq_23.png" alt="equation 23" style="width: 328px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_13.png" alt="equation 13" style="width: 328px; max-width: 100%; height: auto;" /></p>
 
 Normally, the original function $F(s)$ evaluates when the argument $s$ is given to the function. We can simplify this function by partially pre-evaluating it as much as possible. Consequently, the resulting function does not involve any syntactic components but just the manipulation of values, e.g., the logical OR operation $||_{\mathsf{h}}$ for HMaps. To perform partial evaluation, we employ the vm_compute tactic in Rocq [25, 48], which evaluates terms more efficiently than other evaluation tactics.
 
@@ -330,7 +300,7 @@ Note that the state in the standard contains all the wire values along with the 
 
 (1) In the example module, an assignment to d_dbl at line 8 generates an evaluation event for the continuous assignment at line 5 (assign d_quad = ..), since the right-hand-side of the assignment reads d_dbl as an operand. (2) The evaluation event of the always block at line 12 can be generated only by executing the clock event for clk.
 
-<p align="center"><img src="assets/code_7.png" alt="code 7" style="width: 452px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_5.png" alt="code 5" style="width: 452px; max-width: 100%; height: auto;" /></p>
 
 Fig. 7. Execution of the Active and NBA regions
 
@@ -344,9 +314,7 @@ The standard designates 17 event regions. We observe that for synthesizable desi
 
 The standard describes how events in each region should be handled by providing the simulation reference algorithm. Figure 7 presents the algorithm adapted for synthesizable designs (noted in the comments) and our formalization in Rocq. execute_region handles a single region: it nondeterministically picks an event from the region and executes it, which might generate additional events; the execution continues until the region is empty. execute_time_slot handles all the regions in a time slot. For example, we can see that ExecTimeSlotNBA, one of the constructors of ExecTimeSlot, faithfully performs the step "move events in R to the Active region" from the algorithm.
 
-<p align="center"><img src="assets/fig_3.png" alt="Figure 3" style="width: 241px; max-width: 100%; height: auto;" /></p>
-
-<p align="center"><img src="assets/fig_4.png" alt="Figure 4" style="width: 441px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/fig_3.png" alt="Figure 3" style="width: 481px; max-width: 100%; height: auto;" /></p>
 
 ## 4.2 Equivalence Proof
 
@@ -420,7 +388,7 @@ goal as a behavioral refinement between these two ITrees (§5.3). We present a p
 
 ITree [53] is a program-like data structure that represents program behaviors interacting with their environments, equipped with equational theories and compositionality. An ITree with an event type E : Type $\rightarrow$ Type and a result type R : Type is defined coinductively as follows:
 
-<p align="center"><img src="assets/code_8.png" alt="code 8" style="width: 279px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_6.png" alt="code 6" style="width: 279px; max-width: 100%; height: auto;" /></p>
 
 Here, Ret r denotes a simple program that immediately returns the value r; Tau t represents a program that takes a silent step and proceeds with the tree t; and Vis e k is a program that triggers an interaction event e : E A, receives a value a : A from the environment, and continues with k a.
 
@@ -428,13 +396,13 @@ Since it tree E is a monad, we can use the monad notation $\mathsf{x}\gets \math
 
 Refinement. We use behavioral refinement (behavior inclusion) as our correctness criterion. Following Xia et al. [53] and Cho et al. [8], we interpret the behavior of an ITree as a set of possible traces, where each trace represents a sequence of observable events. Here, we present a simplified version of the trace definitions from Cho et al. [8].
 
-<p align="center"><img src="assets/code_9.png" alt="code 9" style="width: 525px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_7.png" alt="code 7" style="width: 525px; max-width: 100%; height: auto;" /></p>
 
-<p align="center"><img src="assets/code_10.png" alt="code 10" style="width: 444px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_8.png" alt="code 8" style="width: 444px; max-width: 100%; height: auto;" /></p>
 
 Using the definition of behaviors, we define behavioral refinement between ITrees:
 
-<p align="center"><img src="assets/code_11.png" alt="code 11" style="width: 336px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_9.png" alt="code 9" style="width: 336px; max-width: 100%; height: auto;" /></p>
 
 It is straightforward to show that behavioral refinement is reflexive and transitive.
 
@@ -442,33 +410,33 @@ It is straightforward to show that behavioral refinement is reflexive and transi
 
 Event and return types. Since a Verilog module does not produce a final value, we set R to $\emptyset$ . There are two event types (E): Input and Output. Each cycle consists of an Input event that reads from the input wires and an Output event that writes to the output wires.
 
-<p align="center"><img src="assets/code_12.png" alt="code 12" style="width: 512px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_10.png" alt="code 10" style="width: 512px; max-width: 100%; height: auto;" /></p>
 
 Initial states. For simplicity, we assume that the initial state of a module is defined as the resulting state when the reset signal rst_n is set to 0. Formally:
 
-<p align="center"><img src="assets/eq_24.png" alt="equation 24" style="width: 175px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_14.png" alt="equation 14" style="width: 175px; max-width: 100%; height: auto;" /></p>
 
 Module ITrees. Accordingly, we define the ITree for a Verilog module $M$ as follows:
 
-<p align="center"><img src="assets/code_13.png" alt="code 13" style="width: 408px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_11.png" alt="code 11" style="width: 408px; max-width: 100%; height: auto;" /></p>
 
 Definition $\llbracket M\rrbracket$ : itree moduleE $\emptyset :=$ module_iritree $M$ $s_0^M$
 
 Filtering inputs and outputs. Hardware designs often require multiple cycles to complete a task. While the task is being processed, hardware typically does not receive external inputs and sets the validity flag to false to indicate invalid outputs. To simplify events of these designs, we propose a filter_io function that transforms a module ITree by (1) removing all the input events by fixing the input value, and (2) filtering out invalid outputs. This is done by using an ITree interpreter interp H provided by the ITree library, which intuitively replaces all trigger e with H e.
 
-<p align="center"><img src="assets/code_14.png" alt="code 14" style="width: 450px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_12.png" alt="code 12" style="width: 450px; max-width: 100%; height: auto;" /></p>
 
 Here, filter_io receives a fixed-input value i and an output-validity predicate P. All input events are replaced with value i, while the output events not matching the predicate P are removed. We use notation $[I]_{in=s,out|P}$ for filter_io s P I and $[M]_{in=s,out|P}$ for filter_io s P $[M]$ .
 
 Determinism. We formalize the determinism theorem for ITree modules:
 
-<p align="center"><img src="assets/code_15.png" alt="code 15" style="width: 256px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_13.png" alt="code 13" style="width: 256px; max-width: 100%; height: auto;" /></p>
 
 Here, input_events is a coinductive filter function that extracts the input stream from a trace. This theorem asserts that for any Verilog module $M$ , a given input stream uniquely determines its trace. The proof of this theorem follows directly from the fact that the single-cycle transition function, $\mathcal{T}_M$ , is a pure Coq function that deterministically maps (inputs, registers) to (regs', outputs).
 
 Modularity. While our semantics offers modularity at the state-update function level, extending this modularity to ITrees for semantic composition of module ITrees presents a significant challenge. This difficulty stems from inherent circular input/output dependencies. Specifically, a submodule's outputs serve as inputs to its parent, and conversely, the parent's outputs act as inputs to the submodule. This mutual dependency precludes a clear sequential execution order for the two ITrees, rendering ITree composition nontrivial. We view the formalization of ITree-level modularity as an interesting avenue for future work.
 
-<p align="center"><img src="assets/fig_5.png" alt="Figure 5" style="width: 524px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/fig_4.png" alt="Figure 4" style="width: 524px; max-width: 100%; height: auto;" /></p>
 
 ## 5.3 Formal Specification of RISC-V
 
@@ -476,13 +444,11 @@ Our correctness condition is based on the mechanized formal specification of RIS
 
 The formal specification provides a function, run1: RiscvState $\rightarrow$ RiscvState, $^7$ simulating the execution of a single CPU instruction. Using this function and a given initial state $s_0^R$ , we define the specification ITree $S_{\mathrm{riscv}}$ as follows:
 
-<p align="center"><img src="assets/code_16.png" alt="code 16" style="width: 405px; max-width: 100%; height: auto;" /></p>
-
-This spec ITree outputs the current instruction address (pc_commit) and its validity (pc_commit_vld) each cycle, with pc_commit_vld always set to 1.
+<p align="left"><img src="assets/code_14.png" alt="code 14" style="width: 537px; max-width: 100%; height: auto;" /></p>
 
 The verification target will be introduced as a Verilog module $P_{\mathrm{impl}}$ in §5.4. We also use the event interpreter from §5.2 to filter out invalid outputs caused by pipeline hazards and to fix the input as $\langle \mathrm{rst\_n}, 1 \rangle_{\mathrm{str}}$ . Assuming the output wire pc_commit_vld indicates output validity, we prove:
 
-<p align="center"><img src="assets/eq_25.png" alt="equation 25" style="width: 463px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_15.png" alt="equation 15" style="width: 463px; max-width: 100%; height: auto;" /></p>
 
 Progress guarantee. The specification $S_{\mathrm{riscv}}$ emits only visible events and thus does not produce a spinning trace with an infinite sequence of Tau events. As such, our verification goal enforces progress in the implementation: it should eventually produce a visible event as well.
 
@@ -508,13 +474,13 @@ The high-level structure of the proof is as follows. We first define a specifica
 
 Verifying the frontend specification. The frontend module receives the caches i_mem and d_mem as input, predicts the next PC, and outputs the fetched instruction and register values. Since its output is passed to the backend only when the validity flag d2e_v1d is set, we define the output specification to express that the output values correspond to the predicted PC when d2e_v1d is true. For example, the fetched instruction inst_d2e should match the instruction at pc_d2e in i_mem. Formally, the output predicate $P$ for the frontend is defined as follows:
 
-<p align="center"><img src="assets/eq_26.png" alt="equation 26" style="width: 373px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_16.png" alt="equation 16" style="width: 373px; max-width: 100%; height: auto;" /></p>
 
 While this abstraction captures the necessary information for the backend, proving the output predicate requires including an invariant over the frontend state in the specification. We define a state invariant Inv for the frontend state $s_{\mathrm{f}}$ and input $i$ , which asserts that the pipeline registers storing the Fetch-stage output are consistent with the predicted PC, in a manner analogous to $P$ .
 
 Using this invariant, the frontend specification is defined as follows:
 
-<p align="center"><img src="assets/eq_27.png" alt="equation 27" style="width: 376px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_17.png" alt="equation 17" style="width: 376px; max-width: 100%; height: auto;" /></p>
 
 This specification is straightforwardly proven from the wire definitions of FD.
 
@@ -536,25 +502,21 @@ Constructing the simulation relation. We construct $(\preceq)$ in a bottom-up fa
 
 The relation between $s^{\mathrm{impl}} \in S$ and $s^{\mathrm{spec}} \in \mathrm{RiscvState}$ requires additional reasoning. Since the processor implementation is pipelined, we must define which PC/instruction we designate as the current ones, so they can be mapped to their counterparts in the spec. In our proof, we chose the ones around the Execute stage—pc_exec for the PC and inst_d2e for the instruction. The intuition behind this decision is that the Execute stage should execute an instruction only if pc_d2e matches pc_exec (i.e., PC prediction is correct), indicating that inst_d2e is the instruction fetched from the instruction cache with pc_exec as the memory address. Formally, the state relation $(\preceq)$ is defined as follows:
 
-<p align="center"><img src="assets/eq_28.png" alt="equation 28" style="width: 378px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_18.png" alt="equation 18" style="width: 538px; max-width: 100%; height: auto;" /></p>
 
 The relations for memory and register file involve case analyses on the pipeline status, since there could be temporal inequivalence while the Writeback stage updates $s^{\mathrm{impl}}$ . In this paper, we omit their definitions for brevity and focus on PC for the rest of the proof.
 
 Finally, we define the simulation relation $(\preceq)$ between ITrees by lifting the state relation:
 
-<p align="center"><img src="assets/eq_29.png" alt="equation 29" style="width: 418px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_19.png" alt="equation 19" style="width: 418px; max-width: 100%; height: auto;" /></p>
 
 Then it is straightforward that $(\preceq)$ relates the initial ITrees:
 
-<p align="center"><img src="assets/eq_30.png" alt="equation 30" style="width: 55px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_20.png" alt="equation 20" style="width: 322px; max-width: 100%; height: auto;" /></p>
 
 (by the state relation definition)
 
-<p align="center"><img src="assets/eq_31.png" alt="equation 31" style="width: 322px; max-width: 100%; height: auto;" /></p>
-
 (by the simulation relation definition)
-
-<p align="center"><img src="assets/eq_32.png" alt="equation 32" style="width: 192px; max-width: 100%; height: auto;" /></p>
 
 (by the ITree definitions)
 
@@ -562,7 +524,7 @@ Proving simulation. Now we prove that $(\preceq)$ is a simulation relation. We s
 
 If pc_commit_vld = 1, then the execution has occurred; thus pc_d2e is equal to pc_exec. Using the frontend output predicate and the precondition that the execution has occurred, we prove that the implementation and the spec execute the same instruction as below:
 
-<p align="center"><img src="assets/eq_33.png" alt="equation 33" style="width: 365px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_21.png" alt="equation 21" style="width: 365px; max-width: 100%; height: auto;" /></p>
 
 We do a similar reasoning to prove that the fetched registers rsv1 and rsv2 in the implementation and spec are also related. With this, proving the simulation relation becomes straightforward, as both the implementation and spec update their PCs with the same instruction and register values.
 
