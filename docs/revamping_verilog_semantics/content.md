@@ -82,7 +82,7 @@ To manage the complexity of the standard semantics, we focus on the synthesizabl
 
 We now discuss the drawbacks of the standard semantics in deductive verification, beginning with nondeterminism. Figure 1 presents two Verilog modules that illustrate the nondeterministic nature of scheduling semantics. The module example contains an assignment (assign d_quad = ...) at line 5. Subsequently, an always_comb ("always") block at line 6 defines a combinational circuit. Within this block, a blocking assignment (d_db1 = d_cnt) prevents the execution of subsequent statements until it completes. In this example, d_db1 = d_cnt executes first, and then d_db1 += d_cnt executes, updating d_db1 with (2 * d_cnt). In the case of d_quad, multiple resolution steps are required due to
 
-<p align="center"><img src="assets/fig_1.png" alt="Figure 1" style="width: 501px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/fig_1.png" alt="Figure 1" style="width: 627px; max-width: 100%; height: auto;" /></p>
 
 the chain of updates. Specifically, in order to evaluate the assignment to d_quad (at line 5) correctly, d_db1 should be evaluated first. The value of d_db1 is evaluated when the "always" block (at line 6) is evaluated. These value-update dependencies are illustrated on the right side of Figure 1.
 
@@ -90,13 +90,13 @@ As discussed in §2.1, the standard resolves these dependencies nondeterministic
 
 Parallel executions. First, the standard semantics requires considering all possible execution orders of updates, even when the updates are independent of each other, and thus any execution order leads to the same state transition.
 
-<p align="left"><img src="assets/code_1.png" alt="code 1" style="width: 476px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_1.png" alt="code 1" style="width: 595px; max-width: 100%; height: auto;" /></p>
 
 The figure above illustrates two distinct execution orders of the example module, both of which result in the same final state. When d_cnt is updated, it triggers two blocks: one that updates d_cnt_n, and another that updates d_db1, followed by d_quad. As shown in the figure, these updates are orthogonal, indicating that the final state is the same regardless of the execution path: whether d_cnt_n is updated first (left path) or d_db1 and d_quad are updated first (right path). Nevertheless, under the standard semantics, both execution paths should still be considered.
 
 Spurious updates. Furthermore, under the standard semantics, assignments may be executed unnecessarily when the values of right-hand-side operands are stale.
 
-<p align="center"><img src="assets/eq_1.png" alt="equation 1" style="width: 505px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_1.png" alt="equation 1" style="width: 632px; max-width: 100%; height: auto;" /></p>
 
 The figure above shows an execution that includes a spurious update. When $\mathrm{d\_cnt}$ is updated (from $v_{0}$ to $v_{1}$ ), executing the assignment to $\mathrm{d\_quad}$ is spurious, as $\mathrm{d\_dbl}$ has not yet been updated ( $\mathrm{d\_quad}$ is incorrectly updated to $2 \cdot v_{0} + 2 \cdot v_{1}$ ). Once $\mathrm{d\_dbl}$ is updated to $2 \cdot v_{1}$ , $\mathrm{d\_quad}$ subsequently obtains the correct value $(4 \cdot v_{1})$ .
 
@@ -106,7 +106,7 @@ In practice, when reasoning about synchronous hardware, it is often more intuiti
 
 Prior approach: relational semantics. To address nondeterminism for designs that adhere to the guidelines (thus deterministic and synthesizable), a common approach employs relational semantics [42]. In this approach, a wire $\mathfrak{p}$ is related to a value $v$ , denoted by $\mathcal{E}(p,v)$ , if the assignment to $\mathfrak{p}$ evaluates to $v$ . Then the semantics for the wires in example can be expressed as follows:
 
-<p align="center"><img src="assets/eq_2.png" alt="equation 2" style="width: 333px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_2.png" alt="equation 2" style="width: 417px; max-width: 100%; height: auto;" /></p>
 
 With this approach, evaluating a variable still requires a proof derivation, which may involve a lengthy chain of entailments to resolve dependencies. For instance, to derive the value of d_quad, one must first derive the value of d_db1, which, in turn, requires deriving the value of d_cnt beforehand. Furthermore, these relations have not been verified to hold under the nondeterministic value updates of the scheduling semantics.
 
@@ -136,7 +136,7 @@ For clarity, we provide a list of unsupported components. We support wires and r
 
 Deterministic designs. In addition to limiting our coverage to synthesizable designs, we also require them to adhere to well-established guidelines [14] widely regarded by designers as best practices for deterministic Verilog modules. Our framework maintains a simple static predicate to ensure that the target design follows these guidelines. The purpose of the guidelines is to ensure that the design is free of race conditions between value updates. Specifically, the guidelines are: (1) use nonblocking assignments for sequential logic or latches, (2) use blocking assignments for combinational logic in an always block, (3) use nonblocking assignments when modeling both sequential and combinational logic in the same always block, (4) avoid mixing blocking and nonblocking assignments in the same always block, and (5) ensure that no variable is assigned, whether blocking or nonblocking, in more than one always block. Interested readers may refer to the guidelines for an intuition behind each item.
 
-<p align="left"><img src="assets/code_2.png" alt="code 2" style="width: 509px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_2.png" alt="code 2" style="width: 637px; max-width: 100%; height: auto;" /></p>
 
 Fig. 2. Formal syntax of Verilog (excerpts)
 
@@ -170,7 +170,7 @@ Our semantics employs a new data structure called "hierarchical maps" (HMap for 
 
 Structs in HMap can represent not only ordinary struct values but also semantic states of modules and module instances. The register state of the module example is represented as follows:
 
-<p align="center"><img src="assets/eq_3.png" alt="equation 3" style="width: 212px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_3.png" alt="equation 3" style="width: 265px; max-width: 100%; height: auto;" /></p>
 
 where $b_{\mathrm{cnt}}$ and $b_{\mathrm{acc}}$ represent the register values of d_cnt (in example) and d_acc (in accumulator), respectively. Note that constructs are inductively defined for a module instance declared as acc. We can also obtain the value $b_{\mathrm{acc}}$ from the state $s$ by applying the path $p = [\mathrm{acc}; \mathrm{d\_acc}]$ , i.e., $s[p] = b_{\mathrm{acc}}$ .
 
@@ -184,15 +184,15 @@ We construct semantic transfer functions in a bottom-up manner, from expressions
 
 Notation: $\mathcal{D}$ (set of declarations); $\mathcal{P}$ (set of hierarchical paths); $S$ (set of states); $S_{\mathrm{u}}$ $(\triangleq S,$ set of state updates); $\mathcal{V}$ $(\triangleq S,$ set of values)
 
-<p align="center"><img src="assets/eq_4.png" alt="equation 4" style="width: 256px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_4.png" alt="equation 4" style="width: 320px; max-width: 100%; height: auto;" /></p>
 
-<p align="center"><img src="assets/eq_5.png" alt="equation 5" style="width: 194px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_5.png" alt="equation 5" style="width: 243px; max-width: 100%; height: auto;" /></p>
 
-<p align="center"><img src="assets/eq_6.png" alt="equation 6" style="width: 141px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_6.png" alt="equation 6" style="width: 176px; max-width: 100%; height: auto;" /></p>
 
-<p align="center"><img src="assets/eq_7.png" alt="equation 7" style="width: 153px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_7.png" alt="equation 7" style="width: 192px; max-width: 100%; height: auto;" /></p>
 
-<p align="center"><img src="assets/eq_8.png" alt="equation 8" style="width: 317px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_8.png" alt="equation 8" style="width: 396px; max-width: 100%; height: auto;" /></p>
 
 Fig. 3. Semantics for expressions, L-values, and statements (excerpts)
 
@@ -214,13 +214,13 @@ Statements: assignments. Denotation of a statement $(\llbracket \cdot \rrbracket
 
 Notation: $\mathcal{D}_{\mathrm{u}}$ ( $\triangleq$ $\mathcal{D}$ , set of declaration updates); $\mathcal{R}$ (set of registers); $\mathcal{R}_{\mathrm{u}}$ ( $\triangleq$ $\mathcal{R}$ , set of register updates)
 
-<p align="center"><img src="assets/eq_9.png" alt="equation 9" style="width: 258px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_9.png" alt="equation 9" style="width: 323px; max-width: 100%; height: auto;" /></p>
 
-<p align="center"><img src="assets/eq_10.png" alt="equation 10" style="width: 440px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_10.png" alt="equation 10" style="width: 550px; max-width: 100%; height: auto;" /></p>
 
-<p align="center"><img src="assets/eq_11.png" alt="equation 11" style="width: 293px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_11.png" alt="equation 11" style="width: 366px; max-width: 100%; height: auto;" /></p>
 
-<p align="center"><img src="assets/eq_12.png" alt="equation 12" style="width: 338px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_12.png" alt="equation 12" style="width: 423px; max-width: 100%; height: auto;" /></p>
 
 Fig. 4. Semantics for blocks and generate-blocks (excerpts)
 
@@ -232,17 +232,17 @@ Statements: conditionals (feat. predicated updates). Next, we analyze the case o
 
 However, to enhance the usability of the semantics, we construct state updates per-variable, allowing easy extraction of transitions for specific variables of interest. This approach is particularly useful for proving invariants involving a subset of variables. To support per-variable state updates, we adopt the notion of *predicated updates*, where each entry in the update map is guarded by a predicate indicating whether the corresponding variable should be updated. $(h_1 \uplus \{p\} h_2)$ denotes a predicated update; for example:
 
-<p align="center"><img src="assets/eq_13.png" alt="equation 13" style="width: 372px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_13.png" alt="equation 13" style="width: 465px; max-width: 100%; height: auto;" /></p>
 
 is a per-variable update map with the same effect as the following:
 
-<p align="center"><img src="assets/eq_14.png" alt="equation 14" style="width: 236px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_14.png" alt="equation 14" style="width: 295px; max-width: 100%; height: auto;" /></p>
 
 With the denotation of a statement in hand, extending it to a sequence of statements $(\llbracket \cdot \rrbracket_{\overline{st}})$ is straightforward: the state updates are accumulated through evaluating previous statements and are used for the evaluation of the next statement.
 
 Blocks. Figure 4 presents excerpts of the denotations for blocks and generate-blocks. Denotation of a block $(\llbracket \cdot \rrbracket_{bl})$ takes the same arguments $(p,d,s)$ as the one for statements and returns the updates for declarations $(\in \mathcal{D}_{\mathrm{u}})$ , wires $(\in S_{\mathrm{u}})$ , and registers $(\in \mathcal{R}_{\mathrm{u}})$ if succeeds. The state update is
 
-<p align="center"><img src="assets/fig_2.png" alt="Figure 2" style="width: 505px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/fig_2.png" alt="Figure 2" style="width: 632px; max-width: 100%; height: auto;" /></p>
 
 determined to be for either wires or registers at this level by examining the type of the block. For example, if the block is always_comb, the update is for wires.
 
@@ -260,7 +260,7 @@ Modules. Finally, we define the semantic transfer function for a module. Present
 
 Now we define the state-transition function of a module, using the least fixed point $(\llbracket \cdot \rrbracket_{mod}^{\infty})$ with respect to the declarations and wire states evaluated so far. Presented in Figure 5, $\llbracket m\rrbracket_{mod}^{\infty}$ is defined by repeatedly applying the semantic transfer function $(\llbracket m\rrbracket_{mod})$ until it reaches the fixed point, which intuitively means that no further dependencies remain unresolved. More formally, in Rocq, $\llbracket \cdot \rrbracket_{mod}^{\infty}$ is defined using a subset type that admits only fixed-point functions. Consequently, to define and use the function, the user must provide a proof that the fixpoint computation terminates, which can typically be discharged trivially by a single automated tactic.
 
-<p align="left"><img src="assets/code_3.png" alt="code 3" style="width: 398px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_3.png" alt="code 3" style="width: 498px; max-width: 100%; height: auto;" /></p>
 
 Fig. 6. A module that joins the outputs of two submodules using the valid/ready protocol, producing output only when both sources are valid.
 
@@ -268,11 +268,11 @@ Fig. 6. A module that joins the outputs of two submodules using the valid/ready 
 
 Assuming rst_n = 1 (i.e., after the reset), it is required to apply the semantic-transfer function twice to obtain the least fixed point ([example]mod); the wire updates are illustrated as follows:
 
-<p align="left"><img src="assets/code_4.png" alt="code 4" style="width: 413px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_4.png" alt="code 4" style="width: 517px; max-width: 100%; height: auto;" /></p>
 
 The state-update function $\llbracket \cdot \rrbracket_{Mod}$ is constructed directly from $\llbracket \cdot \rrbracket_{mod}^{\infty}$ : it takes the input values $(s_i)$ and the current register values $(s_r)$ , and returns register updates $(\in \mathcal{R}_{\mathrm{u}})$ and output values $(\in S)$ . Here, $\llbracket m \rrbracket_{mod}^{\infty}$ is used to derive the wire states and the register updates $(dsr)$ . Using $\llbracket \cdot \rrbracket_{Mod}$ , we can easily define the state-transition function $\mathcal{T}_m: S \times \mathcal{R} \rightarrow \mathcal{R} \times S$ :
 
-<p align="center"><img src="assets/eq_15.png" alt="equation 15" style="width: 301px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_15.png" alt="equation 15" style="width: 376px; max-width: 100%; height: auto;" /></p>
 
 where the current register state $(s_r)$ and the updates $(rs[0])$ are merged to obtain the next state.
 
@@ -280,7 +280,7 @@ Our semantics is modular at the level of state-update functions $\llbracket \cdo
 
 Partial evaluation. As a side benefit, we can further optimize the state-transition function with partial evaluation. For example, the denotation of an expression “a || b” can be partially evaluated $(\rightsquigarrow)$ as follows:
 
-<p align="center"><img src="assets/eq_16.png" alt="equation 16" style="width: 328px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_16.png" alt="equation 16" style="width: 410px; max-width: 100%; height: auto;" /></p>
 
 Normally, the original function $F(s)$ evaluates when the argument $s$ is given to the function. We can simplify this function by partially pre-evaluating it as much as possible. Consequently, the resulting function does not involve any syntactic components but just the manipulation of values, e.g., the logical OR operation $||_{\mathsf{h}}$ for HMaps. To perform partial evaluation, we employ the vm_compute tactic in Rocq [25, 48], which evaluates terms more efficiently than other evaluation tactics.
 
@@ -308,7 +308,7 @@ Note that the state in the standard contains all the wire values along with the 
 
 (1) In the example module, an assignment to d_dbl at line 8 generates an evaluation event for the continuous assignment at line 5 (assign d_quad = ..), since the right-hand-side of the assignment reads d_dbl as an operand. (2) The evaluation event of the always block at line 12 can be generated only by executing the clock event for clk.
 
-<p align="left"><img src="assets/code_5.png" alt="code 5" style="width: 452px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_5.png" alt="code 5" style="width: 565px; max-width: 100%; height: auto;" /></p>
 
 Fig. 7. Execution of the Active and NBA regions
 
@@ -322,7 +322,7 @@ The standard designates 17 event regions. We observe that for synthesizable desi
 
 The standard describes how events in each region should be handled by providing the simulation reference algorithm. Figure 7 presents the algorithm adapted for synthesizable designs (noted in the comments) and our formalization in Rocq. execute_region handles a single region: it nondeterministically picks an event from the region and executes it, which might generate additional events; the execution continues until the region is empty. execute_time_slot handles all the regions in a time slot. For example, we can see that ExecTimeSlotNBA, one of the constructors of ExecTimeSlot, faithfully performs the step "move events in R to the Active region" from the algorithm.
 
-<p align="center"><img src="assets/fig_3.png" alt="Figure 3" style="width: 481px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/fig_3.png" alt="Figure 3" style="width: 602px; max-width: 100%; height: auto;" /></p>
 
 ## 4.2 Equivalence Proof
 
@@ -396,7 +396,7 @@ goal as a behavioral refinement between these two ITrees (§5.3). We present a p
 
 ITree [53] is a program-like data structure that represents program behaviors interacting with their environments, equipped with equational theories and compositionality. An ITree with an event type E : Type $\rightarrow$ Type and a result type R : Type is defined coinductively as follows:
 
-<p align="left"><img src="assets/code_6.png" alt="code 6" style="width: 279px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_6.png" alt="code 6" style="width: 348px; max-width: 100%; height: auto;" /></p>
 
 Here, Ret r denotes a simple program that immediately returns the value r; Tau t represents a program that takes a silent step and proceeds with the tree t; and Vis e k is a program that triggers an interaction event e : E A, receives a value a : A from the environment, and continues with k a.
 
@@ -404,13 +404,13 @@ Since it tree E is a monad, we can use the monad notation $\mathsf{x}\gets \math
 
 Refinement. We use behavioral refinement (behavior inclusion) as our correctness criterion. Following Xia et al. [53] and Cho et al. [8], we interpret the behavior of an ITree as a set of possible traces, where each trace represents a sequence of observable events. Here, we present a simplified version of the trace definitions from Cho et al. [8].
 
-<p align="left"><img src="assets/code_7.png" alt="code 7" style="width: 525px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_7.png" alt="code 7" style="width: 657px; max-width: 100%; height: auto;" /></p>
 
-<p align="left"><img src="assets/code_8.png" alt="code 8" style="width: 444px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_8.png" alt="code 8" style="width: 555px; max-width: 100%; height: auto;" /></p>
 
 Using the definition of behaviors, we define behavioral refinement between ITrees:
 
-<p align="left"><img src="assets/code_9.png" alt="code 9" style="width: 336px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_9.png" alt="code 9" style="width: 420px; max-width: 100%; height: auto;" /></p>
 
 It is straightforward to show that behavioral refinement is reflexive and transitive.
 
@@ -418,33 +418,33 @@ It is straightforward to show that behavioral refinement is reflexive and transi
 
 Event and return types. Since a Verilog module does not produce a final value, we set R to $\emptyset$ . There are two event types (E): Input and Output. Each cycle consists of an Input event that reads from the input wires and an Output event that writes to the output wires.
 
-<p align="left"><img src="assets/code_10.png" alt="code 10" style="width: 512px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_10.png" alt="code 10" style="width: 640px; max-width: 100%; height: auto;" /></p>
 
 Initial states. For simplicity, we assume that the initial state of a module is defined as the resulting state when the reset signal rst_n is set to 0. Formally:
 
-<p align="center"><img src="assets/eq_17.png" alt="equation 17" style="width: 175px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_17.png" alt="equation 17" style="width: 218px; max-width: 100%; height: auto;" /></p>
 
 Module ITrees. Accordingly, we define the ITree for a Verilog module $M$ as follows:
 
-<p align="left"><img src="assets/code_11.png" alt="code 11" style="width: 408px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_11.png" alt="code 11" style="width: 510px; max-width: 100%; height: auto;" /></p>
 
 Definition $\llbracket M\rrbracket$ : itree moduleE $\emptyset :=$ module_iritree $M$ $s_0^M$
 
 Filtering inputs and outputs. Hardware designs often require multiple cycles to complete a task. While the task is being processed, hardware typically does not receive external inputs and sets the validity flag to false to indicate invalid outputs. To simplify events of these designs, we propose a filter_io function that transforms a module ITree by (1) removing all the input events by fixing the input value, and (2) filtering out invalid outputs. This is done by using an ITree interpreter interp H provided by the ITree library, which intuitively replaces all trigger e with H e.
 
-<p align="left"><img src="assets/code_12.png" alt="code 12" style="width: 450px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_12.png" alt="code 12" style="width: 563px; max-width: 100%; height: auto;" /></p>
 
 Here, filter_io receives a fixed-input value i and an output-validity predicate P. All input events are replaced with value i, while the output events not matching the predicate P are removed. We use notation $[I]_{in=s,out|P}$ for filter_io s P I and $[M]_{in=s,out|P}$ for filter_io s P $[M]$ .
 
 Determinism. We formalize the determinism theorem for ITree modules:
 
-<p align="left"><img src="assets/code_13.png" alt="code 13" style="width: 256px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_13.png" alt="code 13" style="width: 320px; max-width: 100%; height: auto;" /></p>
 
 Here, input_events is a coinductive filter function that extracts the input stream from a trace. This theorem asserts that for any Verilog module $M$ , a given input stream uniquely determines its trace. The proof of this theorem follows directly from the fact that the single-cycle transition function, $\mathcal{T}_M$ , is a pure Coq function that deterministically maps (inputs, registers) to (regs', outputs).
 
 Modularity. While our semantics offers modularity at the state-update function level, extending this modularity to ITrees for semantic composition of module ITrees presents a significant challenge. This difficulty stems from inherent circular input/output dependencies. Specifically, a submodule's outputs serve as inputs to its parent, and conversely, the parent's outputs act as inputs to the submodule. This mutual dependency precludes a clear sequential execution order for the two ITrees, rendering ITree composition nontrivial. We view the formalization of ITree-level modularity as an interesting avenue for future work.
 
-<p align="center"><img src="assets/fig_4.png" alt="Figure 4" style="width: 524px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/fig_4.png" alt="Figure 4" style="width: 655px; max-width: 100%; height: auto;" /></p>
 
 ## 5.3 Formal Specification of RISC-V
 
@@ -452,13 +452,13 @@ Our correctness condition is based on the mechanized formal specification of RIS
 
 The formal specification provides a function, run1: RiscvState $\rightarrow$ RiscvState, $^7$ simulating the execution of a single CPU instruction. Using this function and a given initial state $s_0^R$ , we define the specification ITree $S_{\mathrm{riscv}}$ as follows:
 
-<p align="left"><img src="assets/code_14.png" alt="code 14" style="width: 405px; max-width: 100%; height: auto;" /></p>
+<p align="left"><img src="assets/code_14.png" alt="code 14" style="width: 507px; max-width: 100%; height: auto;" /></p>
 
 This spec ITree outputs the current instruction address (pc_commit) and its validity (pc_commit_vld) each cycle, with pc_commit_vld always set to 1.
 
 The verification target will be introduced as a Verilog module $P_{\mathrm{impl}}$ in §5.4. We also use the event interpreter from §5.2 to filter out invalid outputs caused by pipeline hazards and to fix the input as $\langle \mathrm{rst\_n}, 1 \rangle_{\mathrm{str}}$ . Assuming the output wire pc_commit_vld indicates output validity, we prove:
 
-<p align="center"><img src="assets/eq_18.png" alt="equation 18" style="width: 463px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_18.png" alt="equation 18" style="width: 578px; max-width: 100%; height: auto;" /></p>
 
 Progress guarantee. The specification $S_{\mathrm{riscv}}$ emits only visible events and thus does not produce a spinning trace with an infinite sequence of Tau events. As such, our verification goal enforces progress in the implementation: it should eventually produce a visible event as well.
 
@@ -484,13 +484,13 @@ The high-level structure of the proof is as follows. We first define a specifica
 
 Verifying the frontend specification. The frontend module receives the caches i_mem and d_mem as input, predicts the next PC, and outputs the fetched instruction and register values. Since its output is passed to the backend only when the validity flag d2e_v1d is set, we define the output specification to express that the output values correspond to the predicted PC when d2e_v1d is true. For example, the fetched instruction inst_d2e should match the instruction at pc_d2e in i_mem. Formally, the output predicate $P$ for the frontend is defined as follows:
 
-<p align="center"><img src="assets/eq_19.png" alt="equation 19" style="width: 373px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_19.png" alt="equation 19" style="width: 466px; max-width: 100%; height: auto;" /></p>
 
 While this abstraction captures the necessary information for the backend, proving the output predicate requires including an invariant over the frontend state in the specification. We define a state invariant Inv for the frontend state $s_{\mathrm{f}}$ and input $i$ , which asserts that the pipeline registers storing the Fetch-stage output are consistent with the predicted PC, in a manner analogous to $P$ .
 
 Using this invariant, the frontend specification is defined as follows:
 
-<p align="center"><img src="assets/eq_20.png" alt="equation 20" style="width: 376px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_20.png" alt="equation 20" style="width: 470px; max-width: 100%; height: auto;" /></p>
 
 This specification is straightforwardly proven from the wire definitions of FD.
 
@@ -498,11 +498,11 @@ Using the frontend specification. To enable the use of the output predicate proo
 
 Verifying the backend by simulation. We now prove the behavioral refinement of the backend by employing a well-established simulation proof technique, which allows per-step reasoning of execution. Specifically, we use the FreeSim [8] library that enables simulation proofs with ITrees. With FreeSim, the proof of refinement between two ITrees is conducted by defining a simulation relation $(\mathcal{Z}) \subseteq$ itree ER $\times$ itree ER that satisfies the following obligations:
 
-(1) If $(\text{Vis } e k_i) \precsim s$ , then $s$ can reduce to $\text{Vis } e k_s$ , where $\forall a, (k_i a) \precsim (k_s a)$ .
+1. If $(\text{Vis } e k_i) \precsim s$ , then $s$ can reduce to $\text{Vis } e k_s$ , where $\forall a, (k_i a) \precsim (k_s a)$ .
 
-(2) If $(\operatorname{Ret} r) \preceq s$ , then $s$ can also reduce to $\operatorname{Ret} r$ .
+2. If $(\operatorname{Ret} r) \preceq s$ , then $s$ can also reduce to $\operatorname{Ret} r$ .
 
-(3) If $(\text{Tau } t) \precsim s$ , then $t \precsim s$ .
+3. If $(\text{Tau } t) \precsim s$ , then $t \precsim s$ .
 
 Here, the term "reduce" refers to executing an ITree until a visible event is emitted or execution terminates, ignoring silent Tau events. Intuitively, $I \preceq S$ (read $S$ simulates $I$ ) indicates that for each step taken by $I$ , $S$ can perform a corresponding step that produces the same events while preserving the simulation relation. Since the specification can generate the same visible events as the implementation, it is straightforward to prove that every trace of $I$ can be reproduced by $S$ , which is formalized in the FreeSim library as the following adequacy theorem:
 
@@ -512,23 +512,23 @@ Constructing the simulation relation. We construct $(\preceq)$ in a bottom-up fa
 
 The relation between $s^{\mathrm{impl}} \in S$ and $s^{\mathrm{spec}} \in \mathrm{RiscvState}$ requires additional reasoning. Since the processor implementation is pipelined, we must define which PC/instruction we designate as the current ones, so they can be mapped to their counterparts in the spec. In our proof, we chose the ones around the Execute stage—pc_exec for the PC and inst_d2e for the instruction. The intuition behind this decision is that the Execute stage should execute an instruction only if pc_d2e matches pc_exec (i.e., PC prediction is correct), indicating that inst_d2e is the instruction fetched from the instruction cache with pc_exec as the memory address. Formally, the state relation $(\preceq)$ is defined as follows:
 
-<p align="center"><img src="assets/eq_21.png" alt="equation 21" style="width: 378px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_21.png" alt="equation 21" style="width: 473px; max-width: 100%; height: auto;" /></p>
 
 The relations for memory and register file involve case analyses on the pipeline status, since there could be temporal inequivalence while the Writeback stage updates $s^{\mathrm{impl}}$ . In this paper, we omit their definitions for brevity and focus on PC for the rest of the proof.
 
 Finally, we define the simulation relation $(\preceq)$ between ITrees by lifting the state relation:
 
-<p align="center"><img src="assets/eq_22.png" alt="equation 22" style="width: 418px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_22.png" alt="equation 22" style="width: 523px; max-width: 100%; height: auto;" /></p>
 
 Then it is straightforward that $(\preceq)$ relates the initial ITrees:
 
-<p align="center"><img src="assets/eq_23.png" alt="equation 23" style="width: 512px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_23.png" alt="equation 23" style="width: 640px; max-width: 100%; height: auto;" /></p>
 
 Proving simulation. Now we prove that $(\preceq)$ is a simulation relation. We start by assuming $I \preceq S$ , which implies that $I$ is a module ITree with a state $s^{\mathrm{impl}}$ , $S$ is a specification with a state $s^{\mathrm{spec}}$ , and $s^{\mathrm{impl}} \preceq s^{\mathrm{spec}}$ . We need to prove that every step of $I$ can be simulated by $S$ , resulting in the next states still related by the state relation $(\preceq)$ . To this end, we perform a case analysis on pc_commit_vld.
 
 If pc_commit_vld = 1, then the execution has occurred; thus pc_d2e is equal to pc_exec. Using the frontend output predicate and the precondition that the execution has occurred, we prove that the implementation and the spec execute the same instruction as below:
 
-<p align="center"><img src="assets/eq_24.png" alt="equation 24" style="width: 365px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/eq_24.png" alt="equation 24" style="width: 457px; max-width: 100%; height: auto;" /></p>
 
 We do a similar reasoning to prove that the fetched registers rsv1 and rsv2 in the implementation and spec are also related. With this, proving the simulation relation becomes straightforward, as both the implementation and spec update their PCs with the same instruction and register values.
 
@@ -548,7 +548,7 @@ During this proof, we identified and rectified a liveness bug in our processor i
 
 Table 1 compares our framework with four other deductive-verification frameworks for Verilog; Gordon et al. [23, 24, 44], Slobodova et al. [15, 21, 28, 47], Bidmeshki et al. [3, 4], and Loow et al. [16, 27, 31, 32, 34, 36]. Each framework can reason about Verilog designs by either compiling designs described in its own HDL to Verilog ("Translates to" in the figure) or by translating Verilog
 
-<p align="center"><img src="assets/table_1.png" alt="Table 1" style="width: 513px; max-width: 100%; height: auto;" /></p>
+<p align="center"><img src="assets/table_1.png" alt="Table 1" style="width: 642px; max-width: 100%; height: auto;" /></p>
 
 designs into its respective HDL ("Translates from"). We have categorized our evaluation criteria into two parts: semantic features and syntactic coverage.
 
@@ -606,116 +606,116 @@ The Rocq formalization for this paper is available on Zenodo [10].
 
 ## References
 
-[1] 2020. PicoRV32 - A Size-Optimized RISC-V CPU. https://github.com/cliffordwolf/picorv32. [Online; accessed 2023-11-28].
+- [1] 2020. PicoRV32 - A Size-Optimized RISC-V CPU. https://github.com/cliffordwolf/picorv32. [Online; accessed 2023-11-28].
 
-[2] 2024. IEEE Standard for SystemVerilog-Unified Hardware Design, Specification, and Verification Language. IEEE Std 1800-2023 (Revision of IEEE Std 1800-2017) (2024), 1-1354. doi:10.1109/IEEESTD.2024.10458102
+- [2] 2024. IEEE Standard for SystemVerilog-Unified Hardware Design, Specification, and Verification Language. IEEE Std 1800-2023 (Revision of IEEE Std 1800-2017) (2024), 1-1354. doi:10.1109/IEEESTD.2024.10458102
 
-[3] Mohammad-Mahdi Bidmeshki and Yiorgos Makris. 2015. Toward automatic proof generation for information flow policies in third-party hardware IP. In 2015 IEEE International Symposium on Hardware Oriented Security and Trust (HOST). 163-168. doi:10.1109/HST.2015.7140256
+- [3] Mohammad-Mahdi Bidmeshki and Yiorgos Makris. 2015. Toward automatic proof generation for information flow policies in third-party hardware IP. In 2015 IEEE International Symposium on Hardware Oriented Security and Trust (HOST). 163-168. doi:10.1109/HST.2015.7140256
 
-[4] Mohammad-Mahdi Bidmeshki and Yiorgos Makris. 2015. VeriCoq: A Verilog-to-Coq converter for proof-carrying hardware automation. In 2015 IEEE International Symposium on Circuits and Systems (ISCAS). 29-32. doi:10.1109/ISCAS.2015.7168562
+- [4] Mohammad-Mahdi Bidmeshki and Yiorgos Makris. 2015. VeriCoq: A Verilog-to-Coq converter for proof-carrying hardware automation. In 2015 IEEE International Symposium on Circuits and Systems (ISCAS). 29-32. doi:10.1109/ISCAS.2015.7168562
 
-[5] Thomas Bourgeat, Ian Clester, Andres Erbsen, Samuel Gruetter, Pratap Singh, Andy Wright, and Adam Chlipala. 2023. Flexible Instruction-Set Semantics via Abstract Monads (Experience Report). Proc. ACM Program. Lang. 7, ICFP, Article 192 (Aug 2023), 17 pages. doi:10.1145/3607833
+- [5] Thomas Bourgeat, Ian Clester, Andres Erbsen, Samuel Gruetter, Pratap Singh, Andy Wright, and Adam Chlipala. 2023. Flexible Instruction-Set Semantics via Abstract Monads (Experience Report). Proc. ACM Program. Lang. 7, ICFP, Article 192 (Aug 2023), 17 pages. doi:10.1145/3607833
 
-[6] Thomas Bourgeat, Clément Pit-Claudel, Adam Chlipala, and Arvind. 2020. The Essence of Bluespec: A Core Language for Rule-Based Hardware Design. In Proceedings of the 41st ACM SIGPLAN Conference on Programming Language Design and Implementation (London, UK) (PLDI 2020). Association for Computing Machinery, New York, NY, USA, 243-257. doi:10.1145/3385412.3385965
+- [6] Thomas Bourgeat, Clément Pit-Claudel, Adam Chlipala, and Arvind. 2020. The Essence of Bluespec: A Core Language for Rule-Based Hardware Design. In Proceedings of the 41st ACM SIGPLAN Conference on Programming Language Design and Implementation (London, UK) (PLDI 2020). Association for Computing Machinery, New York, NY, USA, 243-257. doi:10.1145/3385412.3385965
 
-[7] Qinlin Chen, Nairen Zhang, Jinping Wang, Tian Tan, Chang Xu, Xiaoxing Ma, and Yue Li. 2023. The Essence of Verilog: A Tractable and Tested Operational Semantics for Verilog. Proc. ACM Program. Lang. 7, OOPSLA2, Article 230 (Oct. 2023), 30 pages. doi:10.1145/3622805
+- [7] Qinlin Chen, Nairen Zhang, Jinping Wang, Tian Tan, Chang Xu, Xiaoxing Ma, and Yue Li. 2023. The Essence of Verilog: A Tractable and Tested Operational Semantics for Verilog. Proc. ACM Program. Lang. 7, OOPSLA2, Article 230 (Oct. 2023), 30 pages. doi:10.1145/3622805
 
-[8] Minki Cho, Youngju Song, Dongjae Lee, Lennard Gaher, and Derek Dreyer. 2023. Stuttering for Free. Proc. ACM Program. Lang. 7, OOPSLA2, Article 281 (Oct 2023), 28 pages. doi:10.1145/3622857
+- [8] Minki Cho, Youngju Song, Dongjae Lee, Lennard Gaher, and Derek Dreyer. 2023. Stuttering for Free. Proc. ACM Program. Lang. 7, OOPSLA2, Article 281 (Oct 2023), 28 pages. doi:10.1145/3622857
 
-[9] Joonwon Choi, Adam Chlipala, and Arvind. 2022. Hemiola: A DSL and Verification Tools to Guide Design and Proof of Hierarchical Cache-Coherence Protocols. In Computer Aided Verification, Sharon Shoham and Yakir Vizel (Eds.). Springer International Publishing, Cham, 317-339.
+- [9] Joonwon Choi, Adam Chlipala, and Arvind. 2022. Hemiola: A DSL and Verification Tools to Guide Design and Proof of Hierarchical Cache-Coherence Protocols. In Computer Aided Verification, Sharon Shoham and Yakir Vizel (Eds.). Springer International Publishing, Cham, 317-339.
 
-[10] Joonwon Choi, Jaewoo Kim, and Jeehoon Kang. 2025. Artifact for "Revamping Verilog Semantics for Foundational Verification". https://doi.org/10.5281/zenodo.16923443. doi:10.5281/zenodo.16923443
+- [10] Joonwon Choi, Jaewoo Kim, and Jeehoon Kang. 2025. Artifact for "Revamping Verilog Semantics for Foundational Verification". https://doi.org/10.5281/zenodo.16923443. doi:10.5281/zenodo.16923443
 
-[11] Joonwon Choi, Muralidaran Vijayaraghavan, Benjamin Sherman, Adam Chlipala, and Arvind. 2017. Kami: A Platform for High-Level Parametric Hardware Specification and Its Modular Verification. Proc. ACM Program. Lang. 1, ICFP, Article 24 (Aug 2017), 30 pages. doi:10.1145/3110268
+- [11] Joonwon Choi, Muralidaran Vijayaraghavan, Benjamin Sherman, Adam Chlipala, and Arvind. 2017. Kami: A Platform for High-Level Parametric Hardware Specification and Its Modular Verification. Proc. ACM Program. Lang. 1, ICFP, Article 24 (Aug 2017), 30 pages. doi:10.1145/3110268
 
-[12] Edmund M. Clarke and E. Allen Emerson. 1981. Design and Synthesis of Synchronization Skeletons Using Branching-Time Temporal Logic. In *Logic of Programs*, Workshop. Springer-Verlag, Berlin, Heidelberg, 52–71.
+- [12] Edmund M. Clarke and E. Allen Emerson. 1981. Design and Synthesis of Synchronization Skeletons Using Branching-Time Temporal Logic. In *Logic of Programs*, Workshop. Springer-Verlag, Berlin, Heidelberg, 52–71.
 
-[13] E. M. Clarke, E. A. Emerson, and A. P. Sistla. 1986. Automatic Verification of Finite-State Concurrent Systems Using Temporal Logic Specifications. ACM Trans. Program. Lang. Syst. 8, 2 (April 1986), 244-263. doi:10.1145/5397.5399
+- [13] E. M. Clarke, E. A. Emerson, and A. P. Sistla. 1986. Automatic Verification of Finite-State Concurrent Systems Using Temporal Logic Specifications. ACM Trans. Program. Lang. Syst. 8, 2 (April 1986), 244-263. doi:10.1145/5397.5399
 
-[14] Clifford Cummings. 2000. Nonblocking Assignments in Verilog Synthesis, Coding Styles That Kill! SNUG (Synopsys Users Group) 2000 User Papers (2000).
+- [14] Clifford Cummings. 2000. Nonblocking Assignments in Verilog Synthesis, Coding Styles That Kill! SNUG (Synopsys Users Group) 2000 User Papers (2000).
 
-[15] Jared Davis, Anna Slobodova, and Sol Swords. 2014. Microcode Verification – Another Piece of the Microprocessor Verification Puzzle. In Interactive Theorem Proving, Gerwin Klein and Ruben Gamboa (Eds.). Springer International Publishing, Cham, 1–16.
+- [15] Jared Davis, Anna Slobodova, and Sol Swords. 2014. Microcode Verification – Another Piece of the Microprocessor Verification Puzzle. In Interactive Theorem Proving, Gerwin Klein and Ruben Gamboa (Eds.). Springer International Publishing, Cham, 1–16.
 
-[16] Ning Dong, Roberto Guanciale, Mads Dam, and Andreas Löw. 2023. Formal Verification of Correctness and Information Flow Security for an In-Order Pipelined Processor. In 2023 Formal Methods in Computer-Aided Design (FMCAD). 247–256. doi:10.34727/2023/isbn.978-3-85448-060-0_33
+- [16] Ning Dong, Roberto Guanciale, Mads Dam, and Andreas Löw. 2023. Formal Verification of Correctness and Information Flow Security for an In-Order Pipelined Processor. In 2023 Formal Methods in Computer-Aided Design (FMCAD). 247–256. doi:10.34727/2023/isbn.978-3-85448-060-0_33
 
-[17] Andres Erbsen, Samuel Gruetter, Joonwon Choi, Clark Wood, and Adam Chipala. 2021. Integration Verification across Software and Hardware for a Simple Embedded System. In Proceedings of the 42nd ACM SIGPLAN International Conference on Programming Language Design and Implementation (Virtual, Canada) (PLDI 2021). Association for Computing Machinery, New York, NY, USA, 604-619. doi:10.1145/3453483.3454065
+- [17] Andres Erbsen, Samuel Gruetter, Joonwon Choi, Clark Wood, and Adam Chipala. 2021. Integration Verification across Software and Hardware for a Simple Embedded System. In Proceedings of the 42nd ACM SIGPLAN International Conference on Programming Language Design and Implementation (Virtual, Canada) (PLDI 2021). Association for Computing Machinery, New York, NY, USA, 604-619. doi:10.1145/3453483.3454065
 
-[18] Javier Esparza, Peter Lammich, René Neumann, Tobias Nipkow, Alexander Schimpf, and Jan-Georg Smaus. 2013. A Fully Verified Executable LTL Model Checker. In Computer Aided Verification, Natasha Sharygina and Helmut Veith (Eds.). Springer Berlin Heidelberg, Berlin, Heidelberg, 463-478.
+- [18] Javier Esparza, Peter Lammich, René Neumann, Tobias Nipkow, Alexander Schimpf, and Jan-Georg Smaus. 2013. A Fully Verified Executable LTL Model Checker. In Computer Aided Verification, Natasha Sharygina and Helmut Veith (Eds.). Springer Berlin Heidelberg, Berlin, Heidelberg, 463-478.
 
-[19] Anthony Fox. 2003. Formal Specification and Verification of ARM6. In Theorem Proving in Higher Order Logics, David Basin and Burkhart Wolff (Eds.). Springer Berlin Heidelberg, Berlin, Heidelberg, 25-40.
+- [19] Anthony Fox. 2003. Formal Specification and Verification of ARM6. In Theorem Proving in Higher Order Logics, David Basin and Burkhart Wolff (Eds.). Springer Berlin Heidelberg, Berlin, Heidelberg, 25-40.
 
-[20] Ran Ginosar. 2011. Metastability and Synchronizers: A Tutorial. IEEE Design and Test of Computers 28, 5 (2011), 23-35. doi:10.1109/MDT.2011.113
+- [20] Ran Ginosar. 2011. Metastability and Synchronizers: A Tutorial. IEEE Design and Test of Computers 28, 5 (2011), 23-35. doi:10.1109/MDT.2011.113
 
-[21] Shilpi Goel, Anna Slobodova, Rob Sumners, and Sol Swords. 2020. Verifying X86 Instruction Implementations. In Proceedings of the 9th ACM SIGPLAN International Conference on Certified Programs and Proofs (New Orleans, LA, USA) (CPP 2020). Association for Computing Machinery, New York, NY, USA, 47-60. doi:10.1145/3372885.3373811
+- [21] Shilpi Goel, Anna Slobodova, Rob Sumners, and Sol Swords. 2020. Verifying X86 Instruction Implementations. In Proceedings of the 9th ACM SIGPLAN International Conference on Certified Programs and Proofs (New Orleans, LA, USA) (CPP 2020). Association for Computing Machinery, New York, NY, USA, 47-60. doi:10.1145/3372885.3373811
 
-[22] Shilpi Goel, Anna Slobodova, Rob Sumners, and Sol Swords. 2021. Balancing Automation and Control for Formal Verification of Microprocessors. In Computer Aided Verification: 33rd International Conference, CAV 2021, Virtual Event, July 20-23, 2021, Proceedings, Part I. Springer-Verlag, Berlin, Heidelberg, 26-45. doi:10.1007/978-3-030-81685-8_2
+- [22] Shilpi Goel, Anna Slobodova, Rob Sumners, and Sol Swords. 2021. Balancing Automation and Control for Formal Verification of Microprocessors. In Computer Aided Verification: 33rd International Conference, CAV 2021, Virtual Event, July 20-23, 2021, Proceedings, Part I. Springer-Verlag, Berlin, Heidelberg, 26-45. doi:10.1007/978-3-030-81685-8_2
 
-[23] Mike Gordon, Juliano Iyoda, Scott Owens, and Konrad Slind. 2006. Automatic Formal Synthesis of Hardware from Higher Order Logic. Electr. Notes Theor. Comput. Sci. 145 (Jan 2006), 27-43. doi:10.1016/j.entcs.2005.10.003
+- [23] Mike Gordon, Juliano Iyoda, Scott Owens, and Konrad Slind. 2006. Automatic Formal Synthesis of Hardware from Higher Order Logic. Electr. Notes Theor. Comput. Sci. 145 (Jan 2006), 27-43. doi:10.1016/j.entcs.2005.10.003
 
-[24] Mike Gordon, Juliano Iyoda, Scott Owens, and Konrad Slind. 2012. A Proof-Producing Hardware Compiler for a Subset of Higher Order Logic. (Feb 2012).
+- [24] Mike Gordon, Juliano Iyoda, Scott Owens, and Konrad Slind. 2012. A Proof-Producing Hardware Compiler for a Subset of Higher Order Logic. (Feb 2012).
 
-[25] Benjamin Grégoire and Xavier Leroy. 2002. A compiled implementation of strong reduction. In Proceedings of the Seventh ACM SIGPLAN International Conference on Functional Programming (Pittsburgh, PA, USA) (ICFP '02). Association for Computing Machinery, New York, NY, USA, 235-246. doi:10.1145/581478.581501
+- [25] Benjamin Grégoire and Xavier Leroy. 2002. A compiled implementation of strong reduction. In Proceedings of the Seventh ACM SIGPLAN International Conference on Functional Programming (Pittsburgh, PA, USA) (ICFP '02). Association for Computing Machinery, New York, NY, USA, 235-246. doi:10.1145/581478.581501
 
-[26] John L Hennessy and David A Patterson. 2011. Computer architecture: a quantitative approach. Elsevier.
+- [26] John L Hennessy and David A Patterson. 2011. Computer architecture: a quantitative approach. Elsevier.
 
-[27] Yann Herklotz, James D. Pollard, Nadesh Ramanathan, and John Wickerson. 2021. Formal verification of high-level synthesis. Proc. ACM Program. Lang. 5, OOPSLA, Article 117 (Oct. 2021), 30 pages. doi:10.1145/3485494
+- [27] Yann Herklotz, James D. Pollard, Nadesh Ramanathan, and John Wickerson. 2021. Formal verification of high-level synthesis. Proc. ACM Program. Lang. 5, OOPSLA, Article 117 (Oct. 2021), 30 pages. doi:10.1145/3485494
 
-[28] Warren A. Hunt, Matt Kaufmann, J. Strother Moore, and Anna Slobodova. 2017. Industrial hardware and software verification with ACL2. Philosophical Transactions of the Royal Society A: Mathematical, Physical and Engineering Sciences 375 (2017). https://api-semanticscholar.org/CorpusID:44895183
+- [28] Warren A. Hunt, Matt Kaufmann, J. Strother Moore, and Anna Slobodova. 2017. Industrial hardware and software verification with ACL2. Philosophical Transactions of the Royal Society A: Mathematical, Physical and Engineering Sciences 375 (2017). https://api-semanticscholar.org/CorpusID:44895183
 
-[29] Wilayat Khan, Farrukh Aslam Khan, Abdelouahid Derhab, and Adi Alhudhaif. 2021. CoCEC: An automatic combinational circuit equivalence checker based on the interactive theorem prover. Complexity 2021, 1 (2021), 5525539.
+- [29] Wilayat Khan, Farrukh Aslam Khan, Abdelouahid Derhab, and Adi Alhudhaif. 2021. CoCEC: An automatic combinational circuit equivalence checker based on the interactive theorem prover. Complexity 2021, 1 (2021), 5525539.
 
-[30] Stella Lau, Thomas Bourgeat, Clément Pit-Claudel, and Adam Chlipala. 2024. Specification and Verification of Strong Timing Isolation of Hardware Enclaves. In Proceedings of the 2024 ACM SIGSAC Conference on Computer and Communications Security.
+- [30] Stella Lau, Thomas Bourgeat, Clément Pit-Claudel, and Adam Chlipala. 2024. Specification and Verification of Strong Timing Isolation of Hardware Enclaves. In Proceedings of the 2024 ACM SIGSAC Conference on Computer and Communications Security.
 
-[31] Andreas Löew. 2021. Lutsig: A Verified Verilog Compiler for Verified Circuit Development. In Proceedings of the 10th ACM SIGPLAN International Conference on Certified Programs and Proofs (Virtual, Denmark) (CPP 2021). Association for Computing Machinery, New York, NY, USA, 46-60. doi:10.1145/3437992.3439916
+- [31] Andreas Löew. 2021. Lutsig: A Verified Verilog Compiler for Verified Circuit Development. In Proceedings of the 10th ACM SIGPLAN International Conference on Certified Programs and Proofs (Virtual, Denmark) (CPP 2021). Association for Computing Machinery, New York, NY, USA, 46-60. doi:10.1145/3437992.3439916
 
-[32] Andreas Lööw, Ramana Kumar, Yong Kiam Tan, Magnus O. Myreen, Michael Norrish, Oskar Abrahamsson, and Anthony Fox. 2019. Verified Compilation on a Verified Processor. In Proceedings of the 40th ACM SIGPLAN Conference on Programming Language Design and Implementation (Phoenix, AZ, USA) (PLDI 2019). Association for Computing Machinery, New York, NY, USA, 1041-1053. doi:10.1145/3314221.3314622
+- [32] Andreas Lööw, Ramana Kumar, Yong Kiam Tan, Magnus O. Myreen, Michael Norrish, Oskar Abrahamsson, and Anthony Fox. 2019. Verified Compilation on a Verified Processor. In Proceedings of the 40th ACM SIGPLAN Conference on Programming Language Design and Implementation (Phoenix, AZ, USA) (PLDI 2019). Association for Computing Machinery, New York, NY, USA, 1041-1053. doi:10.1145/3314221.3314622
 
-[33] Eric Love, Yier Jin, and Yiorgos Makris. 2012. Proof-Carrying Hardware Intellectual Property: A Pathway to Trusted Module Acquisition. IEEE Transactions on Information Forensics and Security 7, 1 (2012), 25-40. doi:10.1109/TIFS.2011.2160627
+- [33] Eric Love, Yier Jin, and Yiorgos Makris. 2012. Proof-Carrying Hardware Intellectual Property: A Pathway to Trusted Module Acquisition. IEEE Transactions on Information Forensics and Security 7, 1 (2012), 25-40. doi:10.1109/TIFS.2011.2160627
 
-[34] Andreas Löew. 2022. Reconciling Verified-Circuit Development and Verilog Development. In 2022 Formal Methods in Computer-Aided Design (FMCAD). 1-10. doi:10.34727/2022/isbn.978-3-85448-053-2_15
+- [34] Andreas Löew. 2022. Reconciling Verified-Circuit Development and Verilog Development. In 2022 Formal Methods in Computer-Aided Design (FMCAD). 1-10. doi:10.34727/2022/isbn.978-3-85448-053-2_15
 
-[35] Andreas Lööw. 2022. A small, but important, concurrency problem in Verilog's semantics? (Work in progress). In 2022 20th ACM-IEEE International Conference on Formal Methods and Models for System Design (MEMOCODE). 1-6. doi:10.1109/MEMOCODE57689.2022.9954591
+- [35] Andreas Lööw. 2022. A small, but important, concurrency problem in Verilog's semantics? (Work in progress). In 2022 20th ACM-IEEE International Conference on Formal Methods and Models for System Design (MEMOCODE). 1-6. doi:10.1109/MEMOCODE57689.2022.9954591
 
-[36] Andreas Lööw and Magnus O. Myreen. 2019. A Proof-Producing Translator for Verilog Development in HOL. In 2019 IEEE/ACM 7th International Conference on Formal Methods in Software Engineering (FormaliSE). 99–108. doi:10.1109/FormaliSE.2019.00020
+- [36] Andreas Lööw and Magnus O. Myreen. 2019. A Proof-Producing Translator for Verilog Development in HOL. In 2019 IEEE/ACM 7th International Conference on Formal Methods in Software Engineering (FormaliSE). 99–108. doi:10.1109/FormaliSE.2019.00020
 
-[37] Gregory Malecha, Daniel Ricketts, Mario M Alvarez, and Sorin Lerner. 2016. Towards foundational verification of cyber-physical systems. In 2016 Science of Security for Cyber-Physical Systems Workshop (SOSCYPS). IEEE, 1-5.
+- [37] Gregory Malecha, Daniel Ricketts, Mario M Alvarez, and Sorin Lerner. 2016. Towards foundational verification of cyber-physical systems. In 2016 Science of Security for Cyber-Physical Systems Workshop (SOSCYPS). IEEE, 1-5.
 
-[38] Kenneth L. McMillan. 1993. Symbolic Model Checking. Kluwer Academic Publishers, USA.
+- [38] Kenneth L. McMillan. 1993. Symbolic Model Checking. Kluwer Academic Publishers, USA.
 
-[39] Patrick Meredith, Michael Katelman, José Meseguer, and Grigore Rosu. 2010. A formal executable semantics of Verilog. In Eighth ACM/IEEE International Conference on Formal Methods and Models for Codesign (MEMOCODE 2010). 179-188. doi:10.1109/MEMCOD.2010.5558634
+- [39] Patrick Meredith, Michael Katelman, José Meseguer, and Grigore Rosu. 2010. A formal executable semantics of Verilog. In Eighth ACM/IEEE International Conference on Formal Methods and Models for Codesign (MEMOCODE 2010). 179-188. doi:10.1109/MEMCOD.2010.5558634
 
-[40] C.H. Perleberg and A.J. Smith. 1993. Branch target buffer design and optimization. IEEE Trans. Comput. 42, 4 (1993), 396-412. doi:10.1109/12.214687
+- [40] C.H. Perleberg and A.J. Smith. 1993. Branch target buffer design and optimization. IEEE Trans. Comput. 42, 4 (1993), 396-412. doi:10.1109/12.214687
 
-[41] João Paulo Pizani Flor and Wouter Swierstra. 2023. Verified Technology Mapping in an Agda DSL for Circuit Design: Circuit refinement through gate and data concretisation. In Proceedings of the 34th Symposium on Implementation and Application of Functional Languages (Copenhagen, Denmark) (IFL '22). Association for Computing Machinery, New York, NY, USA, Article 1, 13 pages. doi:10.1145/3587216.3587217
+- [41] João Paulo Pizani Flor and Wouter Swierstra. 2023. Verified Technology Mapping in an Agda DSL for Circuit Design: Circuit refinement through gate and data concretisation. In Proceedings of the 34th Symposium on Implementation and Application of Functional Languages (Copenhagen, Denmark) (IFL '22). Association for Computing Machinery, New York, NY, USA, Article 1, 13 pages. doi:10.1145/3587216.3587217
 
-[42] Gordon D Plotkin. 1981. A structural approach to operational semantics. Aarhus university.
+- [42] Gordon D Plotkin. 1981. A structural approach to operational semantics. Aarhus university.
 
-[43] Michael Sammler, Rodolphe Lepigre, Robbert Krebbers, Kayvan Memarian, Derek Dreyer, and Deepak Garg. 2021. RefinedC: Automating the foundational verification of C code with refined ownership types. In Proceedings of the 42nd ACM SIGPLAN International Conference on Programming Language Design and Implementation. 158-174.
+- [43] Michael Sammler, Rodolphe Lepigre, Robbert Krebbers, Kayvan Memarian, Derek Dreyer, and Deepak Garg. 2021. RefinedC: Automating the foundational verification of C code with refined ownership types. In Proceedings of the 42nd ACM SIGPLAN International Conference on Programming Language Design and Implementation. 158-174.
 
-[44] Konrad Slind, Scott Owens, Juliano Iyoda, and Mike Gordon. 2007. Proof producing synthesis of arithmetic and cryptographic hardware. Formal Aspects of Computing 19 (Aug 2007), 343-362. doi:10.1007/s00165-007-0028-5
+- [44] Konrad Slind, Scott Owens, Juliano Iyoda, and Mike Gordon. 2007. Proof producing synthesis of arithmetic and cryptographic hardware. Formal Aspects of Computing 19 (Aug 2007), 343-362. doi:10.1007/s00165-007-0028-5
 
-[45] Christoph Sprenger. 1998. A verified model checker for the modal U-calculus in Coq. In Tools and Algorithms for the Construction and Analysis of Systems, Bernhard Steffen (Ed.). Springer Berlin Heidelberg, Berlin, Heidelberg, 167-183.
+- [45] Christoph Sprenger. 1998. A verified model checker for the modal U-calculus in Coq. In Tools and Algorithms for the Construction and Analysis of Systems, Bernhard Steffen (Ed.). Springer Berlin Heidelberg, Berlin, Heidelberg, 167-183.
 
-[46] Stuart Sutherland. 2013. I'm Still in Love with My X!. In Design and Verification Conference (DVCon).
+- [46] Stuart Sutherland. 2013. I'm Still in Love with My X!. In Design and Verification Conference (DVCon).
 
-[47] Mertcan Temel, Anna Slobodova, and Warren A. Hunt. 2020. Automated and Scalable Verification of Integer Multipliers. In Computer Aided Verification, Shuvendu K. Lahiri and Chao Wang (Eds.). Springer International Publishing, Cham,
+- [47] Mertcan Temel, Anna Slobodova, and Warren A. Hunt. 2020. Automated and Scalable Verification of Integer Multipliers. In Computer Aided Verification, Shuvendu K. Lahiri and Chao Wang (Eds.). Springer International Publishing, Cham,
 
-485-507.
+- 485-507.
 
-[48] The Coq Development Team 2022. The Coq Reference Manual, version 8.17.1. The Coq Development Team. https://coq.inria.fr/doc/V8.17.1/refman/
+- [48] The Coq Development Team 2022. The Coq Reference Manual, version 8.17.1. The Coq Development Team. https://coq.inria.fr/doc/V8.17.1/refman/
 
-[49] The Coq Development Team 2022. The Coq Reference Manual, version 8.17.1 – Custom Entries. The Coq Development Team. https://coq.inria.fr/doc/V8.17.1/refman/user-extensions/syntax-extensions.html#custom-entries
+- [49] The Coq Development Team 2022. The Coq Reference Manual, version 8.17.1 – Custom Entries. The Coq Development Team. https://coq.inria.fr/doc/V8.17.1/refman/user-extensions/syntax-extensions.html#custom-entries
 
-[50] The Coq Development Team 2022. The Coq Reference Manual, version 8.17.1 - Profiling Ltac Tactics. The Coq Development Team. https://coq.inria.fr/doc/V8.17.1/refman/prooef-engine/ltc.html#profiling-ltac-tactics
+- [50] The Coq Development Team 2022. The Coq Reference Manual, version 8.17.1 - Profiling Ltac Tactics. The Coq Development Team. https://coq.inria.fr/doc/V8.17.1/refman/prooef-engine/ltc.html#profiling-ltac-tactics
 
-[51] Mike Turpin and Principal Verification Engineer. 2003. The Dangers of Living with an X (bugs hidden in your Verilog). In Synopsys Users Group Meeting.
+- [51] Mike Turpin and Principal Verification Engineer. 2003. The Dangers of Living with an X (bugs hidden in your Verilog). In Synopsys Users Group Meeting.
 
-[52] Andrew Waterman and Krste Asanovic. 2019. The RISC-V Instruction Set Manual, Volume I: User-Level ISA, Document Version 20191213. Technical Report. RISC-V Foundation.
+- [52] Andrew Waterman and Krste Asanovic. 2019. The RISC-V Instruction Set Manual, Volume I: User-Level ISA, Document Version 20191213. Technical Report. RISC-V Foundation.
 
-[53] Li-yao Xia, Yannick Zakowski, Paul He, Chung-Kil Hur, Gregory Malecha, Benjamin C. Pierce, and Steve Zdancewic. 2019. Interaction trees: representing recursive and impure programs in Coq. Proc. ACM Program. Lang. 4, POPL, Article 51 (Dec 2019), 32 pages. doi:10.1145/3371119
+- [53] Li-yao Xia, Yannick Zakowski, Paul He, Chung-Kil Hur, Gregory Malecha, Benjamin C. Pierce, and Steve Zdancewic. 2019. Interaction trees: representing recursive and impure programs in Coq. Proc. ACM Program. Lang. 4, POPL, Article 51 (Dec 2019), 32 pages. doi:10.1145/3371119
 
-[54] Huibiao Zhu, Jifeng He, and J. Bowen. 2006. From algebraic semantics to denotational semantics for Verilog. In 11th IEEE International Conference on Engineering of Complex Computer Systems (ICECCS'06). 13 pp.-. doi:10.1109/ICECCS.2006.1690363
+- [54] Huibiao Zhu, Jifeng He, and J. Bowen. 2006. From algebraic semantics to denotational semantics for Verilog. In 11th IEEE International Conference on Engineering of Complex Computer Systems (ICECCS'06). 13 pp.-. doi:10.1109/ICECCS.2006.1690363
 
-[55] Han Zhu, Huibiao Zhu, Si Liu, and Jian Guo. 2011. Towards Denotational Semantics for Verilog in PVS. In 2011 Fifth International Conference on Secure Software Integration and Reliability Improvement - Companion. 1-2. doi:10.1109/SSIRI-C.2011.10
+- [55] Han Zhu, Huibiao Zhu, Si Liu, and Jian Guo. 2011. Towards Denotational Semantics for Verilog in PVS. In 2011 Fifth International Conference on Secure Software Integration and Reliability Improvement - Companion. 1-2. doi:10.1109/SSIRI-C.2011.10
 
 Received 2025-03-26; accepted 2025-08-12
